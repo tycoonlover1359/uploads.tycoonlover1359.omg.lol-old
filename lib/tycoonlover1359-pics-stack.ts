@@ -12,5 +12,7 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
     // const queue = new sqs.Queue(this, 'Tycoonlover1359PicsQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+
+    new cdk.aws_s3.Bucket(this, "tycoonsFirstCdkBucket")
   }
 }
