@@ -1,18 +1,27 @@
 import * as cdk from 'aws-cdk-lib';
+import {
+  aws_lambda_nodejs as lambda_nodejs,
+  aws_lambda as lambda,
+  Duration
+} from "aws-cdk-lib";
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class Tycoonlover1359PicsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const fn = new lambda_nodejs.NodejsFunction(this, "HelloWorldLambda", {
+      entry: "src/HelloWorldLambda/lambda.ts",
+      handler: "index.handler",
+      timeout: Duration.seconds(10)
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'Tycoonlover1359PicsQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const fnUrl = fn.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE
+    });
 
-    new cdk.aws_s3.Bucket(this, "tycoonsFirstCdkBucket")
+    new cdk.CfnOutput(this, "HelloWorldLmabdaFunctionURL", {
+      value: fnUrl.url
+    });
   }
 }
