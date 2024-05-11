@@ -8,13 +8,14 @@
     "build": "tsc",
     "watch": "tsc -w",
     "build-local": "npx esbuild src/run_local.ts --bundle --outfile=out.js --platform=node",
-    "dev": "npx nodemon --exec 'npm run build-local ; node out.js' --ext 'ts' --ignore 'lib/' --ignore 'bin/'",
+    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -- node out.js' --ext 'ts' --ignore 'lib/' --ignore 'bin/'",
     "inject": "op.exe inject -f -i credentials.env -o injected.credentials.env",
     "rminject": "rm injected.*.env",
     "cdk": "npm run inject ; dotenvx run -f injected.credentials.env -- npx cdk",
     "postcdk": "npm run rminject"
   },
   "devDependencies": {
+    "@types/express-fileupload": "^1.5.0",
     "@types/node": "20.12.7",
     "aws-cdk": "2.141.0",
     "esbuild": "^0.21.1",
@@ -29,6 +30,7 @@
     "aws-cdk-lib": "2.141.0",
     "constructs": "^10.0.0",
     "express": "^4.19.2",
+    "express-fileupload": "^1.5.0",
     "source-map-support": "^0.5.21"
   }
 }

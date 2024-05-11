@@ -1,4 +1,4 @@
-import app from "./HelloWorldLambda/app";
+import app from "./APILambda/app";
 
 const port = process.env.PORT || 8000;
 
