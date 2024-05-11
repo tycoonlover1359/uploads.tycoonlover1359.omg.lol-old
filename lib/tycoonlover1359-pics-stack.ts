@@ -16,6 +16,9 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
             timeout: Duration.seconds(3),
             bundling: {
                 minify: true
+            },
+            environment: {
+                "PICS_DYNAMODB_TABLE": "test table asdlfkj"
             }
         });
 
