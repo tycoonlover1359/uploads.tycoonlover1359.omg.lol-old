@@ -3,9 +3,10 @@ import {
     aws_cloudfront_origins as origins,
     aws_cloudfront as cloudfront,
     aws_dynamodb as dynamodb,
-    aws_s3 as s3,
+    aws_iam as iam,
     aws_lambda_nodejs as lambda_nodejs,
     aws_lambda as lambda,
+    aws_s3 as s3,
     Duration
 } from "aws-cdk-lib";
 import { Construct } from 'constructs';
@@ -29,6 +30,40 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
             })
         });
 
+        const fnRole = new iam.Role(this, "APILambdaExecutionRole", {
+            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+            inlinePolicies: {
+                "ApiLambdaExecutionPolicy": new iam.PolicyDocument({
+                    statements: [
+                        new iam.PolicyStatement({
+                            actions: [
+                                "dynamodb:BatchGetItem",
+                                "dynamodb:GetItem",
+                                "dynamodb:BatchWriteItem",
+                                "dynamodb:PutItem",
+                                "dynamodb:Query",
+                                "dynamodb:Scan",
+                                "dynamodb:UpdateItem"
+                            ],
+                            resources: [
+                                dbTable.tableArn,
+                                `${dbTable.tableArn}/index/*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            actions: [
+                                "s3:PutObject",
+                                "s3:GetObject"
+                            ],
+                            resources: [
+                                `${bucket.bucketArn}/*`
+                            ]
+                        })
+                    ]
+                })
+            }
+        });
+
         const fn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
             entry: "src/APILambda/lambda.ts",
             handler: "index.handler",
@@ -41,7 +76,8 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                 "UPLOADS_S3_BUCKET": bucket.bucketName,
                 "UPLOADS_DYNAMODB_TABLE": dbTable.tableName,
                 "CLOUDFRONT_KEY": CLOUDFRONT_KEY
-            }
+            },
+            role: fnRole
         });
 
         const fnUrl = fn.addFunctionUrl({
