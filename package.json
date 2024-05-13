@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "build-local": "npx esbuild src/run_local.ts --bundle --outfile=out.js --platform=node",
-    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -- node out.js' --ext 'ts' --ignore 'lib/' --ignore 'bin/'",
+    "predev": "npm run inject",
+    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -f injected.credentials.env -- node out.js' --ext 'ts,env' --ignore 'lib/' --ignore 'bin/'",
+    "postdev": "npm run rminject",
     "inject": "op.exe inject -f -i credentials.env -o injected.credentials.env",
     "rminject": "rm injected.*.env",
     "cdk": "npm run inject ; dotenvx run -f injected.credentials.env -- npx cdk",
@@ -24,11 +26,16 @@
     "typescript": "~5.4.5"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.574.0",
+    "@aws-sdk/client-s3": "^3.574.0",
+    "@aws-sdk/lib-dynamodb": "^3.574.0",
     "@codegenie/serverless-express": "^4.14.1",
     "@dotenvx/dotenvx": "^0.38.0",
+    "@theinternetfolks/snowflake": "^1.3.0",
     "@types/express": "^4.17.21",
     "aws-cdk-lib": "2.141.0",
     "constructs": "^10.0.0",
+    "electrodb": "^2.14.0",
     "express": "^4.19.2",
     "express-fileupload": "^1.5.0",
     "source-map-support": "^0.5.21"
