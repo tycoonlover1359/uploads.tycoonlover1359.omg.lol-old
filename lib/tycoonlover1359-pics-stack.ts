@@ -6,6 +6,7 @@ import {
     aws_iam as iam,
     aws_lambda_nodejs as lambda_nodejs,
     aws_lambda as lambda,
+    aws_logs as logs,
     aws_s3 as s3,
     Duration
 } from "aws-cdk-lib";
@@ -28,6 +29,10 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                 readCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 }),
                 writeCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 })
             })
+        });
+
+        const fnLogs = new logs.LogGroup(this, "APILambdaLogs", {
+            retention: logs.RetentionDays.INFINITE
         });
 
         const fnRole = new iam.Role(this, "APILambdaExecutionRole", {
@@ -58,6 +63,16 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                             resources: [
                                 `${bucket.bucketArn}/*`
                             ]
+                        }),
+                        new iam.PolicyStatement({
+                            actions: [
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            resources: [
+                                `${fnLogs.logGroupArn}`,
+                                `${fnLogs.logGroupArn}:log-stream:*`
+                            ]
                         })
                     ]
                 })
@@ -77,7 +92,8 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                 "UPLOADS_DYNAMODB_TABLE": dbTable.tableName,
                 "CLOUDFRONT_KEY": CLOUDFRONT_KEY
             },
-            role: fnRole
+            role: fnRole,
+            logGroup: fnLogs
         });
 
         const fnUrl = fn.addFunctionUrl({
