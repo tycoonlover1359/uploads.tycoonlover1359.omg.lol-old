@@ -1,4 +1,4 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import express, { Request, Response } from "express";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
@@ -13,6 +13,36 @@ const s3Client = new S3Client({
     region: "us-west-2"
 });
 Snowflake.EPOCH = new Date(EPOCH).valueOf();
+
+router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    const uploadId = req.params.uploadId;
+    const fileName = req.params.fileName;
+
+    const command = new GetObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: `${userId}/${uploadId}/${fileName}`
+    });
+    try {
+        const response = await s3Client.send(command);
+        // console.log(response);
+        // res.status(200).send(response.Body?.transformToByteArray());
+        res.status(200).contentType("image/png").end(await response.Body?.transformToByteArray(), "binary");
+    } catch (e) {
+        if (e instanceof NoSuchKey) {
+            res.status(404).send({
+                "success": false,
+                "error": "Item not found"
+            });
+        } else {
+            console.log(e);
+            res.status(500).send({
+                "sucess": false,
+                "error": "Internal server error"
+            });
+        }
+    }
+});
 
 router.post("/upload", async (req: Request, res: Response) => {    
     if (req.files == null || req.files.data == null) {
