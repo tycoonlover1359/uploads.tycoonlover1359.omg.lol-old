@@ -90,6 +90,7 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                 "UPLOADS_AUTH_KEY": "asdlfkjasdf",
                 "UPLOADS_S3_BUCKET": bucket.bucketName,
                 "UPLOADS_DYNAMODB_TABLE": dbTable.tableName,
+                "UPLOADS_BASE_URL": "https://d1vixn6080s60f.cloudfront.net/",
                 "CLOUDFRONT_KEY": CLOUDFRONT_KEY
             },
             role: fnRole,

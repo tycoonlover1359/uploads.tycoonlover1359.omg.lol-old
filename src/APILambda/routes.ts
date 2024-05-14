@@ -1,5 +1,5 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
 import { Upload } from "./models";
@@ -8,6 +8,7 @@ import { UploadNotFoundError } from "./errors";
 const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
 const BASE_URL = process.env.UPLOADS_BASE_URL?.endsWith("/") ? process.env.UPLOADS_BASE_URL : `${process.env.UPLOADS_BASE_URL}/`
 const EPOCH = process.env.UPLOADS_EPOCH || "2024-01-01T00:00:00+00:00"
+const AUTH_KEY = process.env.UPLOADS_AUTH_KEY;
 
 const router = express.Router();
 const s3Client = new S3Client({
@@ -36,8 +37,7 @@ router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) =
         }
 
         const response = await s3Client.send(command);
-        // console.log(response);
-        // res.status(200).send(response.Body?.transformToByteArray());
+        
         res.status(200).contentType(uploadRecord.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
     } catch (e) {
         if (e instanceof NoSuchKey || e instanceof UploadNotFoundError) {
@@ -53,6 +53,25 @@ router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) =
             });
         }
     }
+});
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.headers.authorization == null) {
+        res.status(403).send({
+            "success": false,
+            "error": "No API Key provided"
+        });
+        return;
+    }
+
+    if (req.headers.authorization != AUTH_KEY) {
+        res.status(401).send({
+            "success": false,
+            "error": "Invalid API Key"
+        });
+        return;
+    }
+    next();
 });
 
 router.post("/upload", async (req: Request, res: Response) => {    
