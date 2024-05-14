@@ -23,7 +23,13 @@ router.post("/upload", async (req: Request, res: Response) => {
         return;
     }
 
-    const uploadedData = req.files.data as UploadedFile;
+    let uploadedData: UploadedFile;
+
+    if (Array.isArray(req.files.data)) {
+        uploadedData = req.files.data[0];
+    } else {
+        uploadedData = req.files.data;
+    }
 
     // todo:
     // 1. create unique snowflake id for the file
@@ -44,14 +50,15 @@ router.post("/upload", async (req: Request, res: Response) => {
         filename: uploadedData.name
     }).go();
     // 4. generate and return the urls for that attachment
-
+    const url = BASE_URL + `asdf/${uploadId}/${uploadedData.name}`;
+    // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
 
     res.status(200).send({
         "success": true,
         "urls": {
-            "url": BASE_URL + `example_url`,
-            "thumbnail": BASE_URL + `example_url/thumbnail`,
-            "delete": BASE_URL + `example_url/delete`
+            "url": url,
+            // "thumbnail": BASE_URL + `example_url/thumbnail`,
+            // "delete": delete_url
         }
     });
 });
