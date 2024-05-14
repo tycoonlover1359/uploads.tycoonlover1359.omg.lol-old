@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
 import { Upload } from "./models";
+import { UploadNotFoundError } from "./errors";
 
 const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
 const BASE_URL = process.env.UPLOADS_BASE_URL?.endsWith("/") ? process.env.UPLOADS_BASE_URL : `${process.env.UPLOADS_BASE_URL}/`
@@ -23,13 +24,23 @@ router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) =
         Bucket: S3_BUCKET,
         Key: `${userId}/${uploadId}/${fileName}`
     });
+
     try {
+        const uploadRecord = await Upload.get({
+            userId: userId,
+            uploadId: uploadId
+        }).go();
+
+        if (uploadRecord.data == null) {
+            throw new UploadNotFoundError();
+        }
+
         const response = await s3Client.send(command);
         // console.log(response);
         // res.status(200).send(response.Body?.transformToByteArray());
-        res.status(200).contentType("image/png").end(await response.Body?.transformToByteArray(), "binary");
+        res.status(200).contentType(uploadRecord.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
     } catch (e) {
-        if (e instanceof NoSuchKey) {
+        if (e instanceof NoSuchKey || e instanceof UploadNotFoundError) {
             res.status(404).send({
                 "success": false,
                 "error": "Item not found"
