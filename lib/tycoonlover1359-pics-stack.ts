@@ -80,7 +80,7 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
         });
 
         const fn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
-            entry: "src/APILambda/lambda.ts",
+            entry: "src/server/APILambda/lambda.ts",
             handler: "index.handler",
             timeout: Duration.seconds(3),
             bundling: {
