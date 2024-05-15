@@ -5,9 +5,7 @@
     "tycoonlover1359-pics": "bin/tycoonlover1359-pics.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "inject": "op.exe inject -f -i credentials.env -o injected.credentials.env",
+    "inject": "op.exe inject -f -i environment/credentials.env -o injected.credentials.env",
     "rminject": "rm injected.*.env",
     "cdk": "npm run inject ; dotenvx run -f injected.credentials.env -- npx cdk",
     "postcdk": "npm run rminject"
