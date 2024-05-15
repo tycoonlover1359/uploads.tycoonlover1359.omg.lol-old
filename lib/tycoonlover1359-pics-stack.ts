@@ -8,6 +8,7 @@ import {
     aws_lambda as lambda,
     aws_logs as logs,
     aws_s3 as s3,
+    aws_s3_deployment as s3_deployment,
     Duration
 } from "aws-cdk-lib";
 import { Construct } from 'constructs';
@@ -21,6 +22,10 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
         const bucket = new s3.Bucket(this, "UploadsBucket", {
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
         });
+
+        // const assets = new s3_deployment.BucketDeployment(this, "Deploy", {
+            
+        // });
 
         const dbTable = new dynamodb.TableV2(this, "UploadsTable", {
             partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
@@ -80,7 +85,7 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
         });
 
         const fn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
-            entry: "src/server/APILambda/lambda.ts",
+            entry: "src/server/APILambda/run_lambda.ts",
             handler: "index.handler",
             timeout: Duration.seconds(3),
             bundling: {
