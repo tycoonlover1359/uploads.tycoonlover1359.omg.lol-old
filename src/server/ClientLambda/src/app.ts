@@ -3,8 +3,13 @@ import render from "./renderer";
 
 const app: Express = express();
 
-app.get("/", (req: Request, res: Response) => {
-    res.send(render("view_path"));
+app.get("/", async (req: Request, res: Response) => {
+    const [err, result] = await render("asdf");
+    if (err) {
+        res.status(500).send(err.message);
+    } else {
+        res.send(result);
+    }
 });
 
 export default app;
