@@ -1,9 +1,9 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import fileUpload from "express-fileupload";
 
 const CLOUDFRONT_KEY = process.env.CLOUDFRONT_KEY;
 
-const app = express();
+const app: Express = express();
 app.use(express.json());
 app.use(fileUpload({
     limits: {
