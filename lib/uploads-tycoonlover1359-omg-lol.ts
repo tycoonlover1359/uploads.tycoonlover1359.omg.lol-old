@@ -18,7 +18,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         super(scope, id, props);
 
         // Main Bucket
-        const bucket = new s3.Bucket(this, "UploadsBucket", {
+        const uploadsBucket = new s3.Bucket(this, "UploadsBucket", {
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
         });
 
@@ -27,12 +27,12 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
             sources: [
                 s3_deployment.Source.asset("src/server/ClientLambda/assets")
             ],
-            destinationBucket: bucket,
+            destinationBucket: uploadsBucket,
             destinationKeyPrefix: "assets"
         });
 
         // DynamoDB table
-        const dbTable = new dynamodb.TableV2(this, "UploadsTable", {
+        const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
             partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
             sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
             billing: dynamodb.Billing.provisioned({
@@ -47,8 +47,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         // Lambda Environment Variables
         const lambdaEnvironment = {
             "UPLOADS_AUTH_KEY": "asdlfkjasdf",
-            "UPLOADS_S3_BUCKET": bucket.bucketName,
-            "UPLOADS_DYNAMODB_TABLE": dbTable.tableName,
+            "UPLOADS_S3_BUCKET": uploadsBucket.bucketName,
+            "UPLOADS_DYNAMODB_TABLE": uploadsTable.tableName,
             "UPLOADS_BASE_URL": "https://d1vixn6080s60f.cloudfront.net/",
             "CLOUDFRONT_KEY": CLOUDFRONT_KEY
         };
@@ -58,12 +58,12 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         // ----------
 
         // Cloudwatch Log Group
-        const fnLogs = new logs.LogGroup(this, "APILambdaLogs", {
+        const apiLambdaFnLogs = new logs.LogGroup(this, "APILambdaLogs", {
             retention: logs.RetentionDays.INFINITE
         });
 
         // IAM Role
-        const fnRole = new iam.Role(this, "APILambdaExecutionRole", {
+        const apiLambdaFnRole = new iam.Role(this, "APILambdaExecutionRole", {
             assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
             inlinePolicies: {
                 "ApiLambdaExecutionPolicy": new iam.PolicyDocument({
@@ -79,8 +79,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                                 "dynamodb:UpdateItem"
                             ],
                             resources: [
-                                dbTable.tableArn,
-                                `${dbTable.tableArn}/index/*`
+                                uploadsTable.tableArn,
+                                `${uploadsTable.tableArn}/index/*`
                             ]
                         }),
                         new iam.PolicyStatement({
@@ -89,7 +89,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                                 "s3:GetObject"
                             ],
                             resources: [
-                                `${bucket.bucketArn}/*`
+                                `${uploadsBucket.bucketArn}/*`
                             ]
                         }),
                         new iam.PolicyStatement({
@@ -98,8 +98,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                                 "logs:PutLogEvents"
                             ],
                             resources: [
-                                `${fnLogs.logGroupArn}`,
-                                `${fnLogs.logGroupArn}:log-stream:*`
+                                `${apiLambdaFnLogs.logGroupArn}`,
+                                `${apiLambdaFnLogs.logGroupArn}:log-stream:*`
                             ]
                         })
                     ]
@@ -108,7 +108,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         });
 
         // Lambda function
-        const fn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
+        const apiLambdaFn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
             entry: "src/server/APILambda/run_lambda.ts",
             handler: "index.handler",
             timeout: Duration.seconds(3),
@@ -116,12 +116,12 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 minify: true
             },
             environment: lambdaEnvironment,
-            role: fnRole,
-            logGroup: fnLogs
+            role: apiLambdaFnRole,
+            logGroup: apiLambdaFnLogs
         });
 
         // Lambda function URL
-        const fnUrl = fn.addFunctionUrl({
+        const apiLambdaFnUrl = apiLambdaFn.addFunctionUrl({
             authType: lambda.FunctionUrlAuthType.NONE
         });
 
@@ -146,7 +146,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                                 "s3:GetObject"
                             ],
                             resources: [
-                                `${bucket.bucketArn}/*`
+                                `${uploadsBucket.bucketArn}/*`
                             ]
                         }),
                         new iam.PolicyStatement({
@@ -173,8 +173,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 minify: true
             },
             environment: lambdaEnvironment,
-            role: fnRole,
-            logGroup: fnLogs
+            role: apiLambdaFnRole,
+            logGroup: apiLambdaFnLogs
         });
 
         // Lambda Function URL
@@ -198,7 +198,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 //     origin: new origins.S3Origin(bucket)
                 // },
                 "/api": {
-                    origin: new origins.FunctionUrlOrigin(fnUrl, {
+                    origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
                         customHeaders: {
                             "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
                         }
@@ -212,10 +212,10 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
 
         // Outputs
         new cdk.CfnOutput(this, "DynamodbTable", {
-            value: dbTable.tableName
+            value: uploadsTable.tableName
         });
         new cdk.CfnOutput(this, "S3Bucket", {
-            value: bucket.bucketName
+            value: uploadsBucket.bucketName
         });
         new cdk.CfnOutput(this, "CloudfrontDistribution", {
             value: cdn.domainName
