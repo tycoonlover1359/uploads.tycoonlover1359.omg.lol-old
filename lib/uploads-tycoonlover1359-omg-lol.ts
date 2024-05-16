@@ -22,15 +22,6 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
         });
 
-        // Uploads assets to the bucket
-        const assets = new s3_deployment.BucketDeployment(this, "ClientLambdaAssets", {
-            sources: [
-                s3_deployment.Source.asset("src/server/ClientLambda/assets")
-            ],
-            destinationBucket: uploadsBucket,
-            destinationKeyPrefix: "assets"
-        });
-
         // DynamoDB table
         const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
             partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
@@ -52,6 +43,15 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
             "UPLOADS_BASE_URL": "https://d1vixn6080s60f.cloudfront.net/",
             "CLOUDFRONT_KEY": CLOUDFRONT_KEY
         };
+
+        // Uploads assets to the bucket
+        const assets = new s3_deployment.BucketDeployment(this, "ClientLambdaAssets", {
+            sources: [
+                s3_deployment.Source.asset("src/server/ClientLambda/assets")
+            ],
+            destinationBucket: uploadsBucket,
+            destinationKeyPrefix: "assets"
+        });
 
         // ----------
         // API Lambda
