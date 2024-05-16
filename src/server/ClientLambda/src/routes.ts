@@ -12,12 +12,11 @@ if (process.env.DEVELOPMENT == "true") {
 }
 
 router.get("/", async (req: Request, res: Response) => {
-    const [err, result] = await renderer.render("index");
+    const [err, result] = await renderer.render("index", { title: "hello world from express/ejs!"});
     if (err) {
-        res.status(500).send(err.message);
-    } else {
-        res.send(result);
+        res.status(500);
     }
+    res.send(result);
 });
 
 export default router;

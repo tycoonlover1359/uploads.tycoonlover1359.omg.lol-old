@@ -6,9 +6,11 @@ export interface Renderer {
 
 export class FileSystemRenderer implements Renderer {
     public readonly rootDir: string;
+    public readonly extension: string;
 
-    constructor(rootDir: string) {
+    constructor(rootDir: string, extension?: string) {
         this.rootDir = rootDir;
+        this.extension = extension || "ejs";
     }
 
     public async render(view: string, data?: object): Promise<[Error | null, string]> {
@@ -17,12 +19,14 @@ export class FileSystemRenderer implements Renderer {
         }
     
         try {
-            const html = await ejs.renderFile(`${this.rootDir}/${view}.ejs`, data);
+            const html = await ejs.renderFile(`${this.rootDir}/${view}.${this.extension}`, data);
+            // console.log(html);
             return [null, html];
-        } catch (err) {
+        } catch (e) {
+            const err = e as Error;
             console.log(err);
             const html = "err";
-            return [err as Error, html];
+            return [err, `<pre>${err.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`];
         }
     }
 }
@@ -38,19 +42,3 @@ export class S3Renderer implements Renderer {
         return [null, "s3renderer"];
     }
 }
-
-
-// async function render(view: string, data?: object): Promise<[Error | null, string]> {
-    // if (!data) {
-    //     data = {};
-    // }
-
-    // try {
-    //     const html = await ejs.renderFile(`templates/${view}.ejs`, data);
-    //     return [null, html];
-    // } catch (err) {
-    //     console.log(err);
-    //     const html = "err";
-    //     return [err as Error, html];
-    // }
-// }
