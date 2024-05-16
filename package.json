@@ -2,7 +2,7 @@
   "name": "uploads.tycoonlover1359.omg.lol",
   "version": "0.1.0",
   "bin": {
-    "tycoonlover1359-pics": "bin/tycoonlover1359-pics.js"
+    "uploads-tycoonlover1359-omg-lol": "bin/uploads-tycoonlover1359-omg-lol.js"
   },
   "scripts": {
     "inject": "op.exe inject -f -i environment/credentials.env -o injected.credentials.env",

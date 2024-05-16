@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/tycoonlover1359-pics.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/uploads-tycoonlover1359-omg-lol.ts",
   "watch": {
     "include": [
       "**"
