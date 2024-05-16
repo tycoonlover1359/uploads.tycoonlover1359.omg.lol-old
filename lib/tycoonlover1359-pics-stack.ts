@@ -23,9 +23,13 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
         });
 
-        // const assets = new s3_deployment.BucketDeployment(this, "Deploy", {
-            
-        // });
+        const assets = new s3_deployment.BucketDeployment(this, "ClientLambdaAssets", {
+            sources: [
+                s3_deployment.Source.asset("src/server/ClientLambda/assets")
+            ],
+            destinationBucket: bucket,
+            destinationKeyPrefix: "assets"
+        });
 
         const dbTable = new dynamodb.TableV2(this, "UploadsTable", {
             partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
@@ -119,9 +123,6 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
             priceClass: cloudfront.PriceClass.PRICE_CLASS_100
         });
 
-        new cdk.CfnOutput(this, "ApiLambdaFunctionURL", {
-            value: fnUrl.url
-        });
         new cdk.CfnOutput(this, "DynamodbTable", {
             value: dbTable.tableName
         });
