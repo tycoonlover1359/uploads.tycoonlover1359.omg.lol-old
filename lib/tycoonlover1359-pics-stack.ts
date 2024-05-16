@@ -115,7 +115,8 @@ export class Tycoonlover1359PicsStack extends cdk.Stack {
                 }),
                 allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-            }
+            },
+            priceClass: cloudfront.PriceClass.PRICE_CLASS_100
         });
 
         new cdk.CfnOutput(this, "ApiLambdaFunctionURL", {
