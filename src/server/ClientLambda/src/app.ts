@@ -4,11 +4,6 @@ const CLOUDFRONT_KEY = process.env.CLOUDFRONT_KEY;
 
 const app: Express = express();
 
-if (process.env.DEVELOPMENT == "true") {
-    console.log("using static");
-    app.use(express.static("assets/static"));
-}
-
 app.use(express.json());
 app.use((req: Request, res: Response, next: NextFunction) => {
     if ((process.env.DEVELOPMENT != "true") && (req.headers["apilambda-cloudfrontkey"] != CLOUDFRONT_KEY)) {
