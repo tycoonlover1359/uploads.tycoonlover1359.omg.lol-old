@@ -11,7 +11,7 @@ if (process.env.DEVELOPMENT == "true") {
     renderer = new S3Renderer(process.env.UPLOADS_S3_BUCKET as string, "assets/templates");
 }
 
-async function render(req: Request, res: Response, view: string, data?: object) {
+async function render(req: Request, view: string, data?: object): Promise<[Error | null, string]> {
     if (!data) {
         data = {};
     }
@@ -22,19 +22,18 @@ async function render(req: Request, res: Response, view: string, data?: object) 
     } else {
         [err, result] = await renderer.render("base", { body: (await renderer.render(view, data))[1] });
     }
-    
-    if (err) {
-        res.status(500);
-    }
-    res.send(result);
+
+    return [err, result];
 }
 
 router.get("/", async (req: Request, res: Response) => {
-    render(req, res, "home");
+    const [err, result] = await render(req, "home");
+    res.send(result);
 });
 
 router.get("/login", async (req: Request, res: Response) => {
-    render(req, res, "login");
+    const[err, result] = await render(req, "login");
+    res.send(result);
 });
 
 export default router;
