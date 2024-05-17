@@ -11,12 +11,58 @@ if (process.env.DEVELOPMENT == "true") {
     renderer = new S3Renderer("asdlfkj");
 }
 
-router.get("/", async (req: Request, res: Response) => {
-    const [err, result] = await renderer.render("index", { title: "hello world from express/ejs!"});
+async function render(req: Request, res: Response, view: string, data?: object) {
+    if (!data) {
+        data = {};
+    }
+
+    let err, result;
+    if (req.headers["hx-request"]) {
+        [err, result] = await renderer.render(view, data);
+    } else {
+        [err, result] = await renderer.render("index", { view: (await renderer.render(view, data))[1] });
+    }
+    
     if (err) {
         res.status(500);
     }
     res.send(result);
+}
+
+router.get("/", async (req: Request, res: Response) => {
+
+    render(req, res, "home");
+
+    // const view = "home";
+    // let err, result;
+    // if (req.headers["hx-request"]) {
+    //     [err, result] = await renderer.render(view);
+    // } else {
+    //     [err, result] = await renderer.render("index", { view: (await renderer.render(view))[1] });
+    // }
+
+    // if (err) {
+    //     res.status(500);
+    // }
+    // res.send(result);
+});
+
+router.get("/login", async (req: Request, res: Response) => {
+
+    render(req, res, "login");
+
+    // const view = "login";
+    // let err, result;
+    // if (req.headers["hx-request"]) {
+    //     [err, result] = await renderer.render(view);
+    // } else {
+    //     [err, result] = await renderer.render("index", { view: (await renderer.render(view))[1] });
+    // }
+
+    // if (err) {
+    //     res.status(500);
+    // }
+    // res.send(result);
 });
 
 export default router;
