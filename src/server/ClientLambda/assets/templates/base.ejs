@@ -13,6 +13,10 @@
     <title>Hello world!</title>
 </head>
 <body>
-    <%- body %>
+    <%- await render("navbar"); %>
+    <div class="mx-3" id="app-container">
+        <%- body %>
+    </div>
+    <%- await render("footer"); %>
 </body>
 </html>
