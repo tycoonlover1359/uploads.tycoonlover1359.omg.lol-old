@@ -18,14 +18,17 @@ export class FileSystemRenderer implements Renderer {
             data = {};
         }
     
+        data = {
+            render: async (v: string, d?: object) => (await this.render(v, d))[1],
+            ...data
+        }
         try {
-            const html = await ejs.renderFile(`${this.rootDir}/${view}.${this.extension}`, data);
+            const html = await ejs.renderFile(`${this.rootDir}/${view}.${this.extension}`, data, { async: true });
             // console.log(html);
             return [null, html];
         } catch (e) {
             const err = e as Error;
             console.log(err);
-            const html = "err";
             return [err, `<pre>${err.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`];
         }
     }
