@@ -26,6 +26,11 @@ async function render(req: Request, view: string, data?: object): Promise<[Error
     return [err, result];
 }
 
+router.use((req: Request, res: Response, next: NextFunction) => {
+    res.append("Cache-Control", [`s-maxage=${0}`, `max-age=${15*60}`])
+    next();
+});
+
 router.get("/", async (req: Request, res: Response) => {
     const [err, result] = await render(req, "home");
     res.send(result);
