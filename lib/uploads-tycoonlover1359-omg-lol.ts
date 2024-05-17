@@ -194,10 +194,14 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
             },
             additionalBehaviors: {
-                // "/static": {
-                //     origin: new origins.S3Origin(bucket)
-                // },
-                "/api": {
+                "/static/*": {
+                    origin: new origins.S3Origin(uploadsBucket, {
+                        originPath: "assets/"
+                    }),
+                    allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                },
+                "/api/*": {
                     origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
                         customHeaders: {
                             "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
