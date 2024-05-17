@@ -27,7 +27,7 @@ async function render(req: Request, view: string, data?: object): Promise<[Error
 }
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    res.append("Cache-Control", [`s-maxage=${0}`, `max-age=${15*60}`])
+    res.append("Cache-Control", [`s-maxage=${0}`, /*`max-age=${0}`*/])
     next();
 });
 
