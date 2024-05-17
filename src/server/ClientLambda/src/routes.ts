@@ -8,7 +8,7 @@ let renderer: Renderer;
 if (process.env.DEVELOPMENT == "true") {
     renderer = new FileSystemRenderer("assets/templates");
 } else {
-    renderer = new S3Renderer("asdlfkj");
+    renderer = new S3Renderer(process.env.UPLOADS_S3_BUCKET as string, "assets/templates");
 }
 
 async function render(req: Request, res: Response, view: string, data?: object) {
