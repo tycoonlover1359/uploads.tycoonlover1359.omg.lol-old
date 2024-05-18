@@ -130,12 +130,12 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         // ------------
 
         // Cloudwatch logs
-        const clientFnLogs = new logs.LogGroup(this, "ClientLambdaLogs", {
+        const clientLambdaFnLogs = new logs.LogGroup(this, "ClientLambdaLogs", {
             retention: logs.RetentionDays.INFINITE
         });
 
         // IAM Role
-        const clientFnRole = new iam.Role(this, "ClientLambdaExecutionRole", {
+        const clientLambdaFnRole = new iam.Role(this, "ClientLambdaExecutionRole", {
             assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
             inlinePolicies: {
                 "ApiLambdaExecutionPolicy": new iam.PolicyDocument({
@@ -155,8 +155,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                                 "logs:PutLogEvents"
                             ],
                             resources: [
-                                `${clientFnLogs.logGroupArn}`,
-                                `${clientFnLogs.logGroupArn}:log-stream:*`
+                                `${clientLambdaFnLogs.logGroupArn}`,
+                                `${clientLambdaFnLogs.logGroupArn}:log-stream:*`
                             ]
                         })
                     ]
@@ -173,8 +173,8 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 minify: true
             },
             environment: lambdaEnvironment,
-            role: apiLambdaFnRole,
-            logGroup: apiLambdaFnLogs
+            role: clientLambdaFnRole,
+            logGroup: clientLambdaFnLogs
         });
 
         // Lambda Function URL
