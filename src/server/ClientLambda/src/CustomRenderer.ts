@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import ejs from "ejs";
 
@@ -37,7 +38,33 @@ export class FileSystemRenderer implements Renderer {
 }
 
 interface TemplateCache {
-    [key: string]: string;
+    getItem(itemName: string): Promise<[Error | null, string | null]> | [Error | null, string | null];
+    setItem(itemName: string, itemValue: string): Promise<Error | void> | Error | void;
+}
+
+class FilesystemTemplateCache implements TemplateCache {
+    public readonly cacheDir: string;
+
+    constructor(cacheDir: string) {
+        this.cacheDir = cacheDir;
+    }
+
+    public async getItem(itemName: string): Promise<[Error | null, string | null]> {
+        try {
+            const contents = await fs.readFile(`${this.cacheDir}/${itemName}.ejs`, { encoding: "utf8" });
+            return [null, contents];
+        } catch (e) {
+            return [e as Error, null];
+        }
+    }
+
+    public async setItem(itemName: string, itemValue: string): Promise<Error | void> {
+        try {
+            await fs.writeFile(`${this.cacheDir}/${itemName}.ejs`, itemValue, { encoding: "utf8" });
+        } catch (e) {
+            return e as Error;
+        }
+    }
 }
 
 export class S3Renderer implements Renderer {
@@ -52,7 +79,7 @@ export class S3Renderer implements Renderer {
         this.s3Client = new S3Client({
             region: region || "us-west-2"
         });
-        this.cache = {};
+        this.cache = new FilesystemTemplateCache("/tmp");
     }
 
     public async render(view: string, data?: object): Promise<[Error | null, string]> {
@@ -66,7 +93,9 @@ export class S3Renderer implements Renderer {
         }
 
         try {
-            if (!this.cache[view]) {
+            let [err, result] = await this.cache.getItem(view);
+
+            if (result == null) {
                 console.log(`making s3 request: ${this.keyPrefix}/${view}.ejs`);
                 const command = new GetObjectCommand({
                     Bucket: this.bucket,
@@ -74,10 +103,11 @@ export class S3Renderer implements Renderer {
                 });
     
                 const response = await this.s3Client.send(command);    
-                this.cache[view] = await response.Body?.transformToString() || "";
+                result = await response.Body?.transformToString() || "";
+                this.cache.setItem(view, result);
             }
 
-            const html = await ejs.render(this.cache[view], data, { async: true });
+            const html = await ejs.render(result, data, { async: true });
 
             return [null, html];
         } catch (e) {
