@@ -110,7 +110,7 @@ router.post("/upload", async (req: Request, res: Response) => {
         filename: uploadedData.name
     }).go();
     // 4. generate and return the urls for that attachment
-    const url = BASE_URL + `asdf/${uploadId}/${uploadedData.name}`;
+    const url = BASE_URL + "api/" + `asdf/${uploadId}/${uploadedData.name}`;
     // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
 
     res.status(200).send({
