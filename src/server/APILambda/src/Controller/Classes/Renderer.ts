@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import ejs from "ejs";
+import { S3Handler } from "./S3Handler";
 
 export interface Renderer {
     render(view: string, data?: object): Promise<[Error | null, string]>;
@@ -67,19 +67,27 @@ class FilesystemTemplateCache implements TemplateCache {
     }
 }
 
+interface S3RendererProps {
+    bucket?: string;
+    bucketRegion?: string;
+    keyPrefix?: string;
+    s3Handler?: S3Handler;
+    cache?: TemplateCache
+}
+
 export class S3Renderer implements Renderer {
-    public readonly bucket: string;
     public readonly keyPrefix: string;
-    private readonly s3Client: S3Client;
+    private readonly s3Client: S3Handler;
     private readonly cache: TemplateCache;
 
-    constructor(bucket: string, keyPrefix?: string, region?: string) {
-        this.bucket = bucket;
-        this.keyPrefix = keyPrefix || "";
-        this.s3Client = new S3Client({
-            region: region || "us-west-2"
-        });
-        this.cache = new FilesystemTemplateCache("/tmp");
+    constructor(props: S3RendererProps) {
+        if (props.s3Handler != null) {
+            this.s3Client = props.s3Handler;
+        } else if (props.bucket != null) {
+            this.s3Client = new S3Handler(props.bucket, props.bucketRegion);
+        }
+        this.keyPrefix = props.keyPrefix || "";
+        this.cache = props.cache || new FilesystemTemplateCache("/tmp");
     }
 
     public async render(view: string, data?: object): Promise<[Error | null, string]> {
@@ -97,12 +105,7 @@ export class S3Renderer implements Renderer {
 
             if (result == null) {
                 console.log(`making s3 request: ${this.keyPrefix}/${view}.ejs`);
-                const command = new GetObjectCommand({
-                    Bucket: this.bucket,
-                    Key: `${this.keyPrefix}/${view}.ejs`,
-                });
-    
-                const response = await this.s3Client.send(command);    
+                const response = await this.s3Client.getObject(`${this.keyPrefix}/${view}.ejs`);    
                 result = await response.Body?.transformToString() || "";
                 this.cache.setItem(view, result);
             }
