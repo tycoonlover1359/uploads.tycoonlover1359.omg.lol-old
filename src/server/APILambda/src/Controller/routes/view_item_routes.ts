@@ -2,23 +2,14 @@ import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sd
 import express, { Request, Response, Router, NextFunction } from "express";
 import { Upload } from "../../Model/Upload";
 import { UploadNotFoundError } from "../Classes/Errors";
-
-const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
+import { s3Controller } from "../S3Controller";
 
 const router: Router = express.Router();
-const s3Client = new S3Client({
-    region: "us-west-2"
-});
 
 router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) => {
     const userId = req.params.userId;
     const uploadId = req.params.uploadId;
     const fileName = req.params.fileName;
-
-    const command = new GetObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: `${userId}/${uploadId}/${fileName}`
-    });
 
     try {
         const uploadRecord = await Upload.get({
@@ -30,7 +21,7 @@ router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) =
             throw new UploadNotFoundError();
         }
 
-        const response = await s3Client.send(command);
+        const response = await s3Controller.getObject(`${userId}/${uploadId}/${fileName}`);
         
         res.status(200).contentType(uploadRecord.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
     } catch (e) {
