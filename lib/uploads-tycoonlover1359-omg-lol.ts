@@ -136,6 +136,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                 allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cachePolicy: new cloudfront.CachePolicy(this, "UploadsDistributionTestingCachePolicy", {
+                    // headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
                     minTtl: Duration.seconds(0),
                     maxTtl: Duration.days(1),
                     defaultTtl: Duration.minutes(15)
