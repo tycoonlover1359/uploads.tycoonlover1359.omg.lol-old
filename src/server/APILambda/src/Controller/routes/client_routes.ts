@@ -1,22 +1,7 @@
 import express, { Request, Response, Router, NextFunction } from "express";
-import { renderer } from "../TemplateController";
+import { render } from "../TemplateController";
 
 const router: Router = express.Router();
-
-async function render(req: Request, view: string, data?: object): Promise<[Error | null, string]> {
-    if (!data) {
-        data = {};
-    }
-
-    let err, result;
-    if (req.headers["hx-request"]) {
-        [err, result] = await renderer.render(view, data);
-    } else {
-        [err, result] = await renderer.render("base", { body: (await renderer.render(view, data))[1] });
-    }
-
-    return [err, result];
-}
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     res.append("Cache-Control", [`s-maxage=${0}`, /*`max-age=${0}`*/])
