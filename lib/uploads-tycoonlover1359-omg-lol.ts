@@ -40,7 +40,7 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
             "UPLOADS_AUTH_KEY": "asdlfkjasdf",
             "UPLOADS_S3_BUCKET": uploadsBucket.bucketName,
             "UPLOADS_DYNAMODB_TABLE": uploadsTable.tableName,
-            "UPLOADS_BASE_URL": "https://d1vixn6080s60f.cloudfront.net/",
+            "UPLOADS_BASE_URL": "duchox5x62kyf.cloudfront.net",
             "CLOUDFRONT_KEY": CLOUDFRONT_KEY
         };
 
