@@ -3,6 +3,7 @@ import express, { Request, Response, Router, NextFunction } from "express";
 import { Upload } from "../../Model/Upload";
 import { UploadNotFoundError } from "../Classes/Errors";
 import { s3Controller } from "../S3Controller";
+import { render } from "../TemplateController";
 
 const router: Router = express.Router();
 
@@ -38,6 +39,15 @@ router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) =
             });
         }
     }
+});
+
+router.get("/", async (req: Request, res: Response) => {
+    const [err, result] = await render(req, "view_item", {
+        title: "title",
+        rawLink: "/static/Test.png",
+        downloadLink: "download"
+    });
+    res.send(result);
 });
 
 export { router };
