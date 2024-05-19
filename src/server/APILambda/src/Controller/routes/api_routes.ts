@@ -3,7 +3,6 @@ import express, { NextFunction, Request, Response } from "express";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
 import { Upload } from "../../Model/Upload";
-import { UploadNotFoundError } from "../Errors";
 
 const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
 const BASE_URL = process.env.UPLOADS_BASE_URL?.endsWith("/") ? process.env.UPLOADS_BASE_URL : `${process.env.UPLOADS_BASE_URL}/`
@@ -15,45 +14,6 @@ const s3Client = new S3Client({
     region: "us-west-2"
 });
 Snowflake.EPOCH = new Date(EPOCH).valueOf();
-
-router.get("/:userId/:uploadId/:fileName", async (req: Request, res: Response) => {
-    const userId = req.params.userId;
-    const uploadId = req.params.uploadId;
-    const fileName = req.params.fileName;
-
-    const command = new GetObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: `${userId}/${uploadId}/${fileName}`
-    });
-
-    try {
-        const uploadRecord = await Upload.get({
-            userId: userId,
-            uploadId: uploadId
-        }).go();
-
-        if (uploadRecord.data == null) {
-            throw new UploadNotFoundError();
-        }
-
-        const response = await s3Client.send(command);
-        
-        res.status(200).contentType(uploadRecord.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
-    } catch (e) {
-        if (e instanceof NoSuchKey || e instanceof UploadNotFoundError) {
-            res.status(404).send({
-                "success": false,
-                "error": "Item not found"
-            });
-        } else {
-            console.log(e);
-            res.status(500).send({
-                "sucess": false,
-                "error": "Internal server error"
-            });
-        }
-    }
-});
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     if (req.headers.authorization == null) {
@@ -110,7 +70,7 @@ router.post("/upload", async (req: Request, res: Response) => {
         filename: uploadedData.name
     }).go();
     // 4. generate and return the urls for that attachment
-    const url = BASE_URL + "api/" + `asdf/${uploadId}/${uploadedData.name}`;
+    const url = BASE_URL + "view/" + `asdf/${uploadId}/${uploadedData.name}`;
     // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
 
     res.status(200).send({
@@ -123,4 +83,4 @@ router.post("/upload", async (req: Request, res: Response) => {
     });
 });
 
-export default router;
+export { router };
