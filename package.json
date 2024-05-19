@@ -11,7 +11,7 @@
     "postcdk": "npm run rminject"
   },
   "devDependencies": {
-    "aws-cdk": "2.141.0",
+    "aws-cdk": "^2.141.0",
     "esbuild": "^0.21.1",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
