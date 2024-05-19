@@ -5,10 +5,7 @@
     "uploads-tycoonlover1359-omg-lol": "bin/uploads-tycoonlover1359-omg-lol.js"
   },
   "scripts": {
-    "inject": "op.exe inject -f -i environment/credentials.env -o injected.credentials.env",
-    "rminject": "rm injected.*.env",
-    "cdk": "npm run inject ; dotenvx run -f injected.credentials.env -- npx cdk",
-    "postcdk": "npm run rminject"
+    "cdk": "dotenvx run -f environment/credentials.env -- npx cdk"
   },
   "devDependencies": {
     "aws-cdk": "^2.141.0",

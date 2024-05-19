@@ -4,11 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build-local": "npx esbuild run_local.ts --bundle --outfile=out.js --platform=node",
-    "predev": "npm run inject",
-    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -f injected.credentials.env -- node out.js' --ext 'ts,env' --ignore 'lib/' --ignore 'bin/'",
-    "postdev": "npm run rminject",
-    "inject": "op.exe inject -f -i ../../../environment/credentials.env -o injected.credentials.env",
-    "rminject": "rm injected.*.env"
+    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -f credentials.env -- node out.js' --ext 'ts,env' --ignore 'lib/' --ignore 'bin/'"
   },
   "keywords": [],
   "author": "",
