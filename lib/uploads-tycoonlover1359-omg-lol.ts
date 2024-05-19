@@ -185,13 +185,18 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         // Cloudfront Distribution
         const cdn = new cloudfront.Distribution(this, "UploadsDistribution", {
             defaultBehavior: {
-                origin: new origins.FunctionUrlOrigin(clientFnUrl, {
+                origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
                     customHeaders: {
                         "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
                     }
                 }),
                 allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                cachePolicy: new cloudfront.CachePolicy(this, "UploadsDistributionTestingCachePolicy", {
+                    minTtl: Duration.seconds(0),
+                    maxTtl: Duration.days(1),
+                    defaultTtl: Duration.minutes(15)
+                })
             },
             additionalBehaviors: {
                 "/static/*": {
@@ -201,15 +206,6 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
                     allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                     viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
                 },
-                "/api/*": {
-                    origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
-                        customHeaders: {
-                            "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
-                        }
-                    }),
-                    allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-                }
             },
             priceClass: cloudfront.PriceClass.PRICE_CLASS_100
         });
