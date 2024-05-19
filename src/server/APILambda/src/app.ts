@@ -21,7 +21,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-import client_routes from "./Controller/routes/client_routes";
+import { router as client_routes } from "./Controller/routes/client_routes";
 app.use("/", client_routes);
 
 import api_routes from "./Controller/routes/api_routes";

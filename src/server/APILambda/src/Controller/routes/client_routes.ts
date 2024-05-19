@@ -1,15 +1,7 @@
 import express, { Request, Response, Router, NextFunction } from "express";
-import { FileSystemRenderer, Renderer, S3Renderer } from "../CustomRenderer";
+import { renderer } from "../TemplateController";
 
 const router: Router = express.Router();
-
-let renderer: Renderer;
-
-if (process.env.DEVELOPMENT == "true") {
-    renderer = new FileSystemRenderer("src/View/templates");
-} else {
-    renderer = new S3Renderer(process.env.UPLOADS_S3_BUCKET as string, "assets/templates");
-}
 
 async function render(req: Request, view: string, data?: object): Promise<[Error | null, string]> {
     if (!data) {
@@ -41,4 +33,4 @@ router.get("/login", async (req: Request, res: Response) => {
     res.send(result);
 });
 
-export default router;
+export { router };
