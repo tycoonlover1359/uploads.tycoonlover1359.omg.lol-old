@@ -21,8 +21,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-import router from "./routes";
-app.use("/", router);
+import client_routes from "./Controller/routes/client_routes";
+app.use("/", client_routes);
+
+import api_routes from "./Controller/routes/api_routes";
+app.use("/api", api_routes);
 
 
 export default app;

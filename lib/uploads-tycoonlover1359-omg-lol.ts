@@ -45,9 +45,9 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         };
 
         // Uploads assets to the bucket
-        const assets = new s3_deployment.BucketDeployment(this, "ClientLambdaAssets", {
+        const assets = new s3_deployment.BucketDeployment(this, "APILambdaAssets", {
             sources: [
-                s3_deployment.Source.asset("src/server/ClientLambda/assets")
+                s3_deployment.Source.asset("src/server/APILambda/src/View")
             ],
             destinationBucket: uploadsBucket,
             destinationKeyPrefix: "assets"
@@ -122,63 +122,6 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
 
         // Lambda function URL
         const apiLambdaFnUrl = apiLambdaFn.addFunctionUrl({
-            authType: lambda.FunctionUrlAuthType.NONE
-        });
-
-        // ------------
-        // ClientLambda
-        // ------------
-
-        // Cloudwatch logs
-        const clientLambdaFnLogs = new logs.LogGroup(this, "ClientLambdaLogs", {
-            retention: logs.RetentionDays.INFINITE
-        });
-
-        // IAM Role
-        const clientLambdaFnRole = new iam.Role(this, "ClientLambdaExecutionRole", {
-            assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-            inlinePolicies: {
-                "ApiLambdaExecutionPolicy": new iam.PolicyDocument({
-                    statements: [
-                        new iam.PolicyStatement({
-                            actions: [
-                                "s3:PutObject",
-                                "s3:GetObject"
-                            ],
-                            resources: [
-                                `${uploadsBucket.bucketArn}/*`
-                            ]
-                        }),
-                        new iam.PolicyStatement({
-                            actions: [
-                                "logs:CreateLogStream",
-                                "logs:PutLogEvents"
-                            ],
-                            resources: [
-                                `${clientLambdaFnLogs.logGroupArn}`,
-                                `${clientLambdaFnLogs.logGroupArn}:log-stream:*`
-                            ]
-                        })
-                    ]
-                })
-            }
-        });
-
-        // Lambda Function
-        const clientFn = new lambda_nodejs.NodejsFunction(this, "ClientLambda", {
-            entry: "src/server/ClientLambda/run_lambda.ts",
-            handler: "index.handler",
-            timeout: Duration.seconds(3),
-            bundling: {
-                minify: true
-            },
-            environment: lambdaEnvironment,
-            role: clientLambdaFnRole,
-            logGroup: clientLambdaFnLogs
-        });
-
-        // Lambda Function URL
-        const clientFnUrl = clientFn.addFunctionUrl({
             authType: lambda.FunctionUrlAuthType.NONE
         });
 

@@ -2,8 +2,8 @@ import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sd
 import express, { NextFunction, Request, Response } from "express";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
-import { Upload } from "./models";
-import { UploadNotFoundError } from "./errors";
+import { Upload } from "../../Model/Upload";
+import { UploadNotFoundError } from "../Errors";
 
 const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
 const BASE_URL = process.env.UPLOADS_BASE_URL?.endsWith("/") ? process.env.UPLOADS_BASE_URL : `${process.env.UPLOADS_BASE_URL}/`

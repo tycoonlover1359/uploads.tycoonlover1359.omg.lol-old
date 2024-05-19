@@ -1,12 +1,12 @@
 import express, { Request, Response, Router, NextFunction } from "express";
-import { FileSystemRenderer, Renderer, S3Renderer } from "./CustomRenderer";
+import { FileSystemRenderer, Renderer, S3Renderer } from "../CustomRenderer";
 
 const router: Router = express.Router();
 
 let renderer: Renderer;
 
 if (process.env.DEVELOPMENT == "true") {
-    renderer = new FileSystemRenderer("assets/templates");
+    renderer = new FileSystemRenderer("src/View/templates");
 } else {
     renderer = new S3Renderer(process.env.UPLOADS_S3_BUCKET as string, "assets/templates");
 }
