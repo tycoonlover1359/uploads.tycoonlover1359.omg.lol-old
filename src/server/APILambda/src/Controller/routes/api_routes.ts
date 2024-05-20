@@ -80,7 +80,7 @@ router.post("/upload", async (req: Request, res: Response) => {
     }).go();
     
     // 4. generate and return the urls for that attachment
-    const url = BASE_URL + "view/" + `asdf/${uploadId}/${uploadedData.name}`;
+    const url = BASE_URL + "view/" + `asdf/${uploadId}`;
     const thumbnail = BASE_URL + "view/" + `asdf/${uploadId}/thumbnail.png`;
     // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
 
