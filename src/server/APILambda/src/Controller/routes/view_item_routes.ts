@@ -45,7 +45,6 @@ router.get("/", async (req: Request, res: Response) => {
     const [err, result] = await render(req, "view_item", {
         title: "title",
         rawLink: "/static/Test.png",
-        downloadLink: "download"
     });
     res.send(result);
 });
