@@ -3,11 +3,6 @@ import { render } from "../TemplateController";
 
 const router: Router = express.Router();
 
-router.use((req: Request, res: Response, next: NextFunction) => {
-    res.append("Cache-Control", [`s-maxage=${0}`, /*`max-age=${0}`*/])
-    next();
-});
-
 router.get("/", async (req: Request, res: Response) => {
     const [err, result] = await render(req, "home");
     res.send(result);

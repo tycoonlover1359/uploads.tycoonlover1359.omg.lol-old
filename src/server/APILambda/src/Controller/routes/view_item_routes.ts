@@ -77,6 +77,7 @@ router.get("/:userId/:uploadId/:type", async (req: Request, res: Response) => {
         }
         const response = await s3Controller.getObject(key);
         
+        res.append("Cache-Control", `s-maxage=${15*60}`);
         res.status(200).contentType(uploadRecord.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
     } catch (e) {
         if (e instanceof NoSuchKey || e instanceof UploadNotFoundError) {
