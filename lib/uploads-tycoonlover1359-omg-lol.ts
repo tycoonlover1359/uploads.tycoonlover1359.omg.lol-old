@@ -111,11 +111,15 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
         const apiLambdaFn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
             entry: "src/server/APILambda/run_lambda.ts",
             handler: "index.handler",
+            runtime: lambda.Runtime.NODEJS_20_X,
             timeout: Duration.seconds(3),
             bundling: {
                 minify: true,
                 nodeModules: [ "sharp" ],
-                externalModules: [ "sharp" ]
+                externalModules: [
+                    "@aws-sdk/*",
+                    "sharp"
+                ]
             },
             environment: lambdaEnvironment,
             role: apiLambdaFnRole,
