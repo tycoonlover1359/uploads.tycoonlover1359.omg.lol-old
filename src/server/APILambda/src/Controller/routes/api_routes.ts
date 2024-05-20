@@ -1,5 +1,6 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import express, { NextFunction, Request, Response } from "express";
+import sharp from "sharp";
 import { Snowflake } from "@theinternetfolks/snowflake";
 import { UploadedFile } from "express-fileupload";
 import { Upload } from "../../Model/Upload";
@@ -54,13 +55,21 @@ router.post("/upload", async (req: Request, res: Response) => {
     // todo:
     // 1. create unique snowflake id for the file
     const uploadId = Snowflake.generate();
-    // 2. upload the attachment to s3 with the given snowflake as the key
-    const command = new PutObjectCommand({
+
+    // 2.1 upload the attachment to s3 with the given snowflake as the key\
+    const response = await s3Client.send(new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: `asdf/${uploadId}/${uploadedData.name}`,
         Body: uploadedData.data
-    });
-    const response = await s3Client.send(command);
+    }));
+
+    // 2.2 create a thumbnail image and upload it as well
+    await s3Client.send(new PutObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: `asdf/${uploadId}/thumbnail.png`,
+        Body: await sharp(uploadedData.data).resize(200).toFormat("png").toBuffer()
+    }))
+
     // 3. create a record in dynamodb with the snowflake and original filename
     const record = await Upload.create({
         userId: "asdf",
@@ -69,15 +78,17 @@ router.post("/upload", async (req: Request, res: Response) => {
         mimeType: uploadedData.mimetype,
         filename: uploadedData.name
     }).go();
+    
     // 4. generate and return the urls for that attachment
     const url = BASE_URL + "view/" + `asdf/${uploadId}/${uploadedData.name}`;
+    const thumbnail = BASE_URL + "view/" + `asdf/${uploadId}/thumbnail.png`;
     // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
 
     res.status(200).send({
         "success": true,
         "urls": {
             "url": url,
-            // "thumbnail": BASE_URL + `example_url/thumbnail`,
+            "thumbnail": thumbnail,
             // "delete": delete_url
         }
     });

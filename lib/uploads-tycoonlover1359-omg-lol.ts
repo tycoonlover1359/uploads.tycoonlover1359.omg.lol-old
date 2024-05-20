@@ -113,7 +113,9 @@ export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
             handler: "index.handler",
             timeout: Duration.seconds(3),
             bundling: {
-                minify: true
+                minify: true,
+                nodeModules: [ "sharp" ],
+                externalModules: [ "sharp" ]
             },
             environment: lambdaEnvironment,
             role: apiLambdaFnRole,
