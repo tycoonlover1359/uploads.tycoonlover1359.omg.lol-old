@@ -13,4 +13,16 @@ router.get("/login", async (req: Request, res: Response) => {
     res.send(result);
 });
 
+router.get("/register", async (req: Request, res: Response) => {
+    res.send("register")
+});
+
+router.get("/uploads", async (req: Request, res: Response) => {
+    res.send("uploads");
+});
+
+router.get("/:uploadId", async (req: Request, res: Response) => {
+    res.send("view upload");
+});
+
 export { router };
