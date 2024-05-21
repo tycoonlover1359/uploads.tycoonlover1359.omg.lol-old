@@ -1,7 +1,6 @@
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { Entity } from "electrodb";
+import { client } from "./DynamoDBClient";
 
-const client = new DynamoDB();
 const DYNAMODB_TABLE = `${process.env.UPLOADS_DYNAMODB_TABLE}`;
 
 const Upload = new Entity(
