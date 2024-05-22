@@ -12,22 +12,33 @@ const Upload = new Entity(
         },
         attributes: {
             userId: {
-                type: "string"
+                type: "string",
+                required: true,
+                readOnly: true
             },
             uploadId: {
-                type: "string"
-            },
-            s3Key: {
                 type: "string",
-                required: true
+                required: true,
+                readOnly: true
             },
             mimeType: {
                 type: "string",
-                required: true
+                required: true,
+                readOnly: true
             },
             filename: {
                 type: "string",
+                required: true,
+                readOnly: true
+            },
+            title: {
+                type: "string",
                 required: true
+            },
+            private: {
+                type: "boolean",
+                required: true,
+                default: true
             }
         },
         indexes: {
