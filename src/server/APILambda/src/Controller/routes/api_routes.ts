@@ -56,33 +56,35 @@ router.post("/upload", async (req: Request, res: Response) => {
     // 1. create unique snowflake id for the file
     const uploadId = Snowflake.generate();
 
+    const userId = "51452077936190346";
+
     // 2.1 upload the attachment to s3 with the given snowflake as the key\
     const response = await s3Client.send(new PutObjectCommand({
         Bucket: S3_BUCKET,
-        Key: `asdf/${uploadId}/${uploadedData.name}`,
+        Key: `uploads/${userId}/${uploadId}/${uploadedData.name}`,
         Body: uploadedData.data
     }));
 
     // 2.2 create a thumbnail image and upload it as well
     await s3Client.send(new PutObjectCommand({
         Bucket: S3_BUCKET,
-        Key: `asdf/${uploadId}/thumbnail.png`,
+        Key: `uploads/${userId}/${uploadId}/thumbnail.png`,
         Body: await sharp(uploadedData.data).resize(200).toFormat("png").toBuffer()
     }))
 
     // 3. create a record in dynamodb with the snowflake and original filename
     const record = await Upload.create({
-        userId: "asdf",
+        userId: userId,
         uploadId: uploadId,
-        s3Key: `uploads/asdf/${uploadId}`,
         mimeType: uploadedData.mimetype,
-        filename: uploadedData.name
+        filename: uploadedData.name,
+        title: uploadedData.name,
     }).go();
     
     // 4. generate and return the urls for that attachment
-    const url = BASE_URL + "view/" + `asdf/${uploadId}`;
-    const thumbnail = BASE_URL + "view/" + `asdf/${uploadId}/thumbnail.png`;
-    // const delete_url = BASE_URL + `asdf/${uploadId}/delete`;
+    const url = BASE_URL + "uploads/" + `${userId}/${uploadId}`;
+    const thumbnail = BASE_URL + "uploads/" + `${userId}/${uploadId}?type=thumbnail`;
+    // const delete_url = BASE_URL + `${userId}/${uploadId}/delete`;
 
     res.status(200).send({
         "success": true,
