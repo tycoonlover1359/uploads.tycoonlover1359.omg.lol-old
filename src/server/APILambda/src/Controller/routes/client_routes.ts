@@ -1,5 +1,8 @@
 import express, { Request, Response, Router, NextFunction } from "express";
 import { render } from "../TemplateController";
+import { Upload } from "../../Model/Upload";
+import { s3Controller } from "../S3Controller";
+import { NoSuchKey } from "@aws-sdk/client-s3";
 
 const router: Router = express.Router();
 
@@ -43,9 +46,75 @@ router.get("/uploads", async (req: Request, res: Response) => {
     res.send(result);
 });
 
-router.get("/uploads/:uploadId", async (req: Request, res: Response) => {
-    console.log(req.params.uploadId);
-    res.send("view upload");
+router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => {
+    const upload = await Upload.get({
+        userId: req.params.userId,
+        uploadId: req.params.uploadId
+    }).go();
+
+    if (upload.data == null) {
+        console.log("upload is null")
+        const [err, result] = await render(req, "errors/404");
+        res.status(404).send(result);
+        return;
+    }
+
+    const type = req.query.type ? req.query.type : null;
+
+    if (type) {
+        const mimeType = upload.data.mimeType;
+        if (mimeType.includes("image/")) {
+            let key: string;
+            if (type === "raw") {
+                key = `uploads/${req.params.userId}/${req.params. uploadId}/${upload.data.filename}`;
+            } else if (type === "thumbnail") {
+                key = `uploads/${req.params.userId}/${req.params. uploadId}/thumbnail.png`;
+            } else {
+                const [err, result] = await render(req, "errors/404");
+                res.status(404).send(result);
+                return;
+            }
+    
+            try {
+                const response = await s3Controller.getObject(key);
+                res.status(200).contentType(upload.data.mimeType).end(await response.Body?.transformToByteArray(), "binary");
+            } catch (e) {
+                const err = e as Error;
+                if (e instanceof NoSuchKey) {
+                    const [err, result] = await render(req, "errors/404");
+                    res.status(404).send(result);
+                } else {
+                    res.sendStatus(500);
+                }
+            } finally {
+                return;
+            }
+        }
+    } else {
+        const [err, result] = await render(req, "view_item", {
+            title: `Test.png`,
+            links: {
+                raw: `/uploads/${req.params.userId}/${req.params. uploadId}?type=raw`
+            }
+        });
+    
+        res.send(result);
+    }
 });
+
+// router.get("/uploads/:userId/:uploadId/raw", async (req: Request, res: Response) => {
+//     const upload = await Upload.get({
+//         userId: req.params.userId,
+//         uploadId: req.params.uploadId
+//     }).go();
+
+//     if (upload.data == null) {
+//         const [err, result] = await render(req, "errors/404");
+//         res.status(404).send(result);
+//         return;
+//     }
+
+
+// });
 
 export { router };
