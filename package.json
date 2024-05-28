@@ -20,8 +20,10 @@
     "typescript": "~5.4.5"
   },
   "dependencies": {
+    "@types/express": "^4.17.21",
     "aws-cdk-lib": "2.142.1",
     "constructs": "^10.0.0",
+    "express": "^4.19.2",
     "source-map-support": "^0.5.21"
   }
 }
