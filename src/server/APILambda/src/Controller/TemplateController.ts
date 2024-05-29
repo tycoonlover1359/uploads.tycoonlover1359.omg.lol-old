@@ -4,14 +4,14 @@ import { s3Controller } from "./S3Controller";
 
 let renderer: Renderer;
 
-if (process.env.DEVELOPMENT == "true") {
+// if (process.env.DEVELOPMENT == "true") {
     renderer = new FileSystemRenderer("src/View/templates");
-} else {
-    renderer = new S3Renderer({
-        s3Handler: s3Controller,
-        keyPrefix: "assets/templates"
-    })
-}
+// } else {
+//     renderer = new S3Renderer({
+//         s3Handler: s3Controller,
+//         keyPrefix: "assets/templates"
+//     })
+// }
 
 async function render(req: Request, view: string, data?: object): Promise<[Error | null, string]> {
     if (!data) {
