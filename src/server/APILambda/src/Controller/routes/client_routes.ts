@@ -47,6 +47,7 @@ router.get("/uploads", async (req: Request, res: Response) => {
 });
 
 router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => {
+    console.log(`getting upload ${req.params.userId}/${req.params.uploadId}`)
     const upload = await Upload.get({
         userId: req.params.userId,
         uploadId: req.params.uploadId
@@ -58,12 +59,15 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
         res.status(404).send(result);
         return;
     }
+    console.log("got upload");
 
     const type = req.query.type ? req.query.type : null;
 
     if (type) {
+        console.log(`type is: ${type}`)
         const mimeType = upload.data.mimeType;
         if (mimeType.includes("image/")) {
+            console.log("item is image; sending raw")
             let key: string;
             if (type === "raw") {
                 key = `uploads/${req.params.userId}/${req.params. uploadId}/${upload.data.filename}`;
@@ -91,6 +95,7 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
             }
         }
     } else {
+        console.log("no type; sending user page");
         const [err, result] = await render(req, "view_item", {
             title: `Test.png`,
             links: {
