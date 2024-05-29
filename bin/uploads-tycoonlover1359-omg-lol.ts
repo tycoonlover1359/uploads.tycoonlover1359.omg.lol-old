@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { UploadsTycoonlover1359OmgLol } from '../lib/uploads-tycoonlover1359-omg-lol';
+import { UploadsTycoonlover1359OmgLolStack } from '../lib/uploads-tycoonlover1359-omg-lol';
 
 const app = new cdk.App();
-new UploadsTycoonlover1359OmgLol(app, 'uploads-tycoonlover1359-omg-lol', {
+new UploadsTycoonlover1359OmgLolStack(app, 'UploadsTycoonlover1359OmgLolStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

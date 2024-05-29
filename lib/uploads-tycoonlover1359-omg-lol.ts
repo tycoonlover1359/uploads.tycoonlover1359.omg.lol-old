@@ -13,7 +13,7 @@ import {
 } from "aws-cdk-lib";
 import { Construct } from 'constructs';
 
-export class UploadsTycoonlover1359OmgLol extends cdk.Stack {
+export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
