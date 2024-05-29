@@ -18,40 +18,40 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
         super(scope, id, props);
 
         // Main Bucket
-        const uploadsBucket = new s3.Bucket(this, "UploadsBucket", {
-            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
-        });
+        // const uploadsBucket = new s3.Bucket(this, "UploadsBucket", {
+        //     blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+        // });
 
         // DynamoDB table
-        const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
-            partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
-            sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
-            billing: dynamodb.Billing.provisioned({
-                readCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 }),
-                writeCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 })
-            })
-        });
+        // const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
+        //     partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
+        //     sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
+        //     billing: dynamodb.Billing.provisioned({
+        //         readCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 }),
+        //         writeCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 })
+        //     })
+        // });
 
         // Cloudfront header added to each request from Cloudfront
-        const CLOUDFRONT_KEY = "01a5ff63-13d3-41dc-87e2-d4c6dad1c975";
+        // const CLOUDFRONT_KEY = "01a5ff63-13d3-41dc-87e2-d4c6dad1c975";
 
         // Lambda Environment Variables
         const lambdaEnvironment = {
             "UPLOADS_AUTH_KEY": "asdlfkjasdf",
-            "UPLOADS_S3_BUCKET": uploadsBucket.bucketName,
-            "UPLOADS_DYNAMODB_TABLE": uploadsTable.tableName,
+            "UPLOADS_S3_BUCKET": "uploadsBucket.bucketName",
+            "UPLOADS_DYNAMODB_TABLE": "uploadsTable.tableName",
             "UPLOADS_BASE_URL": "duchox5x62kyf.cloudfront.net",
-            "CLOUDFRONT_KEY": CLOUDFRONT_KEY
+            "CLOUDFRONT_KEY": "CLOUDFRONT_KEY"
         };
 
         // Uploads assets to the bucket
-        const assets = new s3_deployment.BucketDeployment(this, "APILambdaAssets", {
-            sources: [
-                s3_deployment.Source.asset("src/server/APILambda/src/View")
-            ],
-            destinationBucket: uploadsBucket,
-            destinationKeyPrefix: "assets"
-        });
+        // const assets = new s3_deployment.BucketDeployment(this, "APILambdaAssets", {
+        //     sources: [
+        //         s3_deployment.Source.asset("src/server/APILambda/src/View")
+        //     ],
+        //     destinationBucket: uploadsBucket,
+        //     destinationKeyPrefix: "assets"
+        // });
 
         // ----------
         // API Lambda
@@ -68,30 +68,30 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
             inlinePolicies: {
                 "ApiLambdaExecutionPolicy": new iam.PolicyDocument({
                     statements: [
-                        new iam.PolicyStatement({
-                            actions: [
-                                "dynamodb:BatchGetItem",
-                                "dynamodb:GetItem",
-                                "dynamodb:BatchWriteItem",
-                                "dynamodb:PutItem",
-                                "dynamodb:Query",
-                                "dynamodb:Scan",
-                                "dynamodb:UpdateItem"
-                            ],
-                            resources: [
-                                uploadsTable.tableArn,
-                                `${uploadsTable.tableArn}/index/*`
-                            ]
-                        }),
-                        new iam.PolicyStatement({
-                            actions: [
-                                "s3:PutObject",
-                                "s3:GetObject"
-                            ],
-                            resources: [
-                                `${uploadsBucket.bucketArn}/*`
-                            ]
-                        }),
+                        // new iam.PolicyStatement({
+                        //     actions: [
+                        //         "dynamodb:BatchGetItem",
+                        //         "dynamodb:GetItem",
+                        //         "dynamodb:BatchWriteItem",
+                        //         "dynamodb:PutItem",
+                        //         "dynamodb:Query",
+                        //         "dynamodb:Scan",
+                        //         "dynamodb:UpdateItem"
+                        //     ],
+                        //     resources: [
+                        //         uploadsTable.tableArn,
+                        //         `${uploadsTable.tableArn}/index/*`
+                        //     ]
+                        // }),
+                        // new iam.PolicyStatement({
+                        //     actions: [
+                        //         "s3:PutObject",
+                        //         "s3:GetObject"
+                        //     ],
+                        //     resources: [
+                        //         `${uploadsBucket.bucketArn}/*`
+                        //     ]
+                        // }),
                         new iam.PolicyStatement({
                             actions: [
                                 "logs:CreateLogStream",
@@ -109,6 +109,14 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
 
         // Lambda Web Adapter layer
         const lambdaWebAdapterX86 = lambda.LayerVersion.fromLayerVersionArn(this, "LambdaAdapterLayerX86", `arn:aws:lambda:${this.region}:753240598075:layer:LambdaAdapterLayerX86:22`);
+
+        // Sharp layer
+        const sharpX86 = new lambda.LayerVersion(this, "SharpLayerX86", {
+            code: lambda.Code.fromAsset("src/layers/sharp/x86"),
+            compatibleArchitectures: [
+                lambda.Architecture.X86_64
+            ]
+        });
 
         // Lambda function
         // const apiLambdaFn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
@@ -133,7 +141,8 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
             code: lambda.Code.fromAsset("src/server/APILambda", {
                 exclude: [
                     "*",
-                    "!run.sh"
+                    "!run.sh",
+                    "!index.mjs"
                 ]
             }),
             handler: "run.sh",
@@ -144,7 +153,10 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
                 PORT: "8080"
             },
             memorySize: 128,
-            layers: [ lambdaWebAdapterX86 ],
+            layers: [
+                lambdaWebAdapterX86,
+                sharpX86
+            ],
             timeout: Duration.seconds(5)
         });
 
@@ -154,43 +166,46 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
         });
 
         // Cloudfront Distribution
-        const cdn = new cloudfront.Distribution(this, "UploadsDistribution", {
-            defaultBehavior: {
-                origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
-                    customHeaders: {
-                        "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
-                    }
-                }),
-                allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                cachePolicy: new cloudfront.CachePolicy(this, "UploadsDistributionTestingCachePolicy", {
-                    // headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
-                    minTtl: Duration.seconds(0),
-                    maxTtl: Duration.days(1),
-                    defaultTtl: Duration.minutes(15)
-                })
-            },
-            additionalBehaviors: {
-                "/static/*": {
-                    origin: new origins.S3Origin(uploadsBucket, {
-                        originPath: "assets/"
-                    }),
-                    allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-                    viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
-                },
-            },
-            priceClass: cloudfront.PriceClass.PRICE_CLASS_100
-        });
+        // const cdn = new cloudfront.Distribution(this, "UploadsDistribution", {
+        //     defaultBehavior: {
+        //         origin: new origins.FunctionUrlOrigin(apiLambdaFnUrl, {
+        //             customHeaders: {
+        //                 "ApiLambda-CloudfrontKey": CLOUDFRONT_KEY
+        //             }
+        //         }),
+        //         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        //         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        //         cachePolicy: new cloudfront.CachePolicy(this, "UploadsDistributionTestingCachePolicy", {
+        //             // headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
+        //             minTtl: Duration.seconds(0),
+        //             maxTtl: Duration.days(1),
+        //             defaultTtl: Duration.minutes(15)
+        //         })
+        //     },
+        //     additionalBehaviors: {
+        //         "/static/*": {
+        //             origin: new origins.S3Origin(uploadsBucket, {
+        //                 originPath: "assets/"
+        //             }),
+        //             allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        //             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+        //         },
+        //     },
+        //     priceClass: cloudfront.PriceClass.PRICE_CLASS_100
+        // });
 
         // Outputs
-        new cdk.CfnOutput(this, "DynamodbTable", {
-            value: uploadsTable.tableName
-        });
-        new cdk.CfnOutput(this, "S3Bucket", {
-            value: uploadsBucket.bucketName
-        });
-        new cdk.CfnOutput(this, "CloudfrontDistribution", {
-            value: cdn.domainName
+        // new cdk.CfnOutput(this, "DynamodbTable", {
+        //     value: uploadsTable.tableName
+        // });
+        // new cdk.CfnOutput(this, "S3Bucket", {
+        //     value: uploadsBucket.bucketName
+        // });
+        // new cdk.CfnOutput(this, "CloudfrontDistribution", {
+        //     value: cdn.domainName
+        // });
+        new cdk.CfnOutput(this, "APILambdaFunctionUrl", {
+            value: apiLambdaFnUrl.url
         });
     }
 }
