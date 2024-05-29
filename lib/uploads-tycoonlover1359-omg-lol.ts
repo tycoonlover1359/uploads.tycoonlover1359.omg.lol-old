@@ -107,23 +107,45 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
             }
         });
 
+        // Lambda Web Adapter layer
+        const lambdaWebAdapterX86 = lambda.LayerVersion.fromLayerVersionArn(this, "LambdaAdapterLayerX86", `arn:aws:lambda:${this.region}:753240598075:layer:LambdaAdapterLayerX86:22`);
+
         // Lambda function
-        const apiLambdaFn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
-            entry: "src/server/APILambda/run_lambda.ts",
-            handler: "index.handler",
+        // const apiLambdaFn = new lambda_nodejs.NodejsFunction(this, "APILambda", {
+        //     entry: "src/server/APILambda/run_lambda.ts",
+        //     handler: "index.handler",
+        //     runtime: lambda.Runtime.NODEJS_20_X,
+        //     timeout: Duration.seconds(3),
+        //     bundling: {
+        //         minify: true,
+        //         nodeModules: [ "sharp" ],
+        //         externalModules: [
+        //             "@aws-sdk/*",
+        //             "sharp"
+        //         ]
+        //     },
+        //     environment: lambdaEnvironment,
+        //     role: apiLambdaFnRole,
+        //     logGroup: apiLambdaFnLogs
+        // });
+        const apiLambdaFn = new lambda.Function(this, "APILambda", {
             runtime: lambda.Runtime.NODEJS_20_X,
-            timeout: Duration.seconds(3),
-            bundling: {
-                minify: true,
-                nodeModules: [ "sharp" ],
-                externalModules: [
-                    "@aws-sdk/*",
-                    "sharp"
+            code: lambda.Code.fromAsset("src/server/APILambda", {
+                exclude: [
+                    "*",
+                    "!run.sh"
                 ]
+            }),
+            handler: "run.sh",
+            environment: {
+                ...lambdaEnvironment,
+                AWS_LAMBDA_EXEC_WRAPPER: "/opt/bootstrap",
+                RUST_LOG: "info",
+                PORT: "8080"
             },
-            environment: lambdaEnvironment,
-            role: apiLambdaFnRole,
-            logGroup: apiLambdaFnLogs
+            memorySize: 128,
+            layers: [ lambdaWebAdapterX86 ],
+            timeout: Duration.seconds(5)
         });
 
         // Lambda function URL
