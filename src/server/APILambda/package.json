@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build-local": "npx esbuild run_local.ts --bundle --outfile=out.js --platform=node --external:sharp",
-    "dev": "npx nodemon --exec 'npm run build-local ; dotenvx run -f variables.env -f credentials.env -- node out.js' --ext 'ts,env' --ignore 'lib/' --ignore 'bin/'"
+    "build": "bun build index.ts --outfile=index.mjs --target=node --external='sharp' --minify",
+    "build-sourcemap": "bun run build --sourcemap",
+    "dev": "bun --env-file=credentials.env --env-file=variables.env --watch run index.ts"
   },
   "keywords": [],
   "author": "",
