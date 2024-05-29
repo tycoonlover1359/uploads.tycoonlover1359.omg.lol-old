@@ -5,7 +5,7 @@
     "uploads-tycoonlover1359-omg-lol": "bin/uploads-tycoonlover1359-omg-lol.js"
   },
   "scripts": {
-    "cdk": "dotenvx run -f environment/credentials.env -- npx cdk"
+    "cdk": "npx cdk"
   },
   "devDependencies": {
     "aws-cdk": "^2.141.0",
