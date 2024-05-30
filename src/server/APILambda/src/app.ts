@@ -11,6 +11,8 @@ app.use(fileUpload({
     }
 }));
 app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log(req.path);
+
     if ((process.env.DEVELOPMENT != "true") && (req.headers["apilambda-cloudfrontkey"] != CLOUDFRONT_KEY)) {
         res.status(403).send({
             "success": false,
