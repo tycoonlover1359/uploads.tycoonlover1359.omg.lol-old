@@ -19,7 +19,7 @@ async function render(req: Request, view: string, data?: object): Promise<[Error
     }
 
     let err, result;
-    if (req.headers["hx-request"]) {
+    if (req.headers["hx-boosted"]) {
         [err, result] = await renderer.render(view, data);
     } else {
         [err, result] = await renderer.render("base", { body: (await renderer.render(view, data))[1] });

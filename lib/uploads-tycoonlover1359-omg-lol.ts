@@ -167,9 +167,9 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
                 }),
                 allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
                 viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                // cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED
+                compress: true,
                 cachePolicy: new cloudfront.CachePolicy(this, "UploadsDistributionTestingCachePolicy", {
-                    // headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Authorization"),
+                    headerBehavior: cloudfront.CacheHeaderBehavior.allowList("Hx-Boosted", "Hx-Request"),
                     queryStringBehavior: cloudfront.CacheQueryStringBehavior.allowList("type"),
                     minTtl: Duration.seconds(0),
                     maxTtl: Duration.days(1),
