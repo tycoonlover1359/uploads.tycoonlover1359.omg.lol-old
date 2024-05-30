@@ -24,9 +24,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 import { router as client_routes } from "./Controller/routes/client_routes";
 app.use("/", client_routes);
 
-// import { router as view_item_routes } from "./Controller/routes/view_item_routes";
-// app.use("/view", view_item_routes);
-
 import { router as api_routes } from "./Controller/routes/api_routes";
 app.use("/api", api_routes);
 
