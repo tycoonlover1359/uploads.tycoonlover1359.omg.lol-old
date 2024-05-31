@@ -6,7 +6,19 @@ import { UploadedFile } from "express-fileupload";
 import { Upload } from "../../Model/Upload";
 
 const S3_BUCKET = process.env.UPLOADS_S3_BUCKET;
-const BASE_URL = process.env.UPLOADS_BASE_URL?.endsWith("/") ? process.env.UPLOADS_BASE_URL : `${process.env.UPLOADS_BASE_URL}/`
+const BASE_URL = (() => {
+    let baseUrl = process.env.UPLOADS_BASE_URL;
+    if (!baseUrl) {
+        throw new Error("Environment Variable `UPLOADS_BASE_URL` is not defined");
+    }
+    if (!baseUrl.endsWith("/")) {
+        baseUrl = `${baseUrl}/`;
+    }
+    if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+        baseUrl = `https://${baseUrl}`;
+    }
+    return baseUrl;
+})();
 const EPOCH = process.env.UPLOADS_EPOCH || "2024-01-01T00:00:00+00:00"
 const AUTH_KEY = process.env.UPLOADS_AUTH_KEY;
 
