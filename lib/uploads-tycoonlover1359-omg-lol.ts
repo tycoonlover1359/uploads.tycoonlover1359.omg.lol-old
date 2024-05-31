@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import {
+    aws_certificatemanager as acm,
     aws_cloudfront_origins as origins,
     aws_cloudfront as cloudfront,
     aws_dynamodb as dynamodb,
@@ -43,7 +44,7 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
             "UPLOADS_AUTH_KEY": "asdlfkjasdf",
             "UPLOADS_S3_BUCKET": uploadsBucket.bucketName,
             "UPLOADS_DYNAMODB_TABLE": uploadsTable.tableName,
-            "UPLOADS_BASE_URL": "d3bd5go3u17xxn.cloudfront.net",
+            "UPLOADS_BASE_URL": "https://uploads.tycoonlover1359.omg.lol",
             "CLOUDFRONT_KEY": CLOUDFRONT_KEY
         };
 
@@ -157,6 +158,13 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
             authType: lambda.FunctionUrlAuthType.NONE
         });
 
+        // ----------------------------
+        // Cloudfront & ACM Certificate
+        // ----------------------------
+
+        // ACM Certificate
+        const certificate = acm.Certificate.fromCertificateArn(this, "UploadsCertificate", "arn:aws:acm:us-east-1:651915650471:certificate/806aa22b-c822-4f57-af19-d3a8e797e975");
+
         // Cloudfront Distribution
         const cdn = new cloudfront.Distribution(this, "UploadsDistribution", {
             defaultBehavior: {
@@ -185,7 +193,11 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
                     viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
                 },
             },
-            priceClass: cloudfront.PriceClass.PRICE_CLASS_100
+            priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+            domainNames: [
+                "uploads.tycoonlover1359.omg.lol"
+            ],
+            certificate: certificate
         });
 
         // Outputs
