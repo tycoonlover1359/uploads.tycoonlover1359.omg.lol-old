@@ -70,21 +70,32 @@ router.post("/upload", async (req: Request, res: Response) => {
 
     const userId = "51452077936190346";
 
-    // // 2.1 upload the attachment to s3 with the given snowflake as the key\
+    // 2.1 upload the attachment to s3 with the given snowflake as the key\
     const response = await s3Client.send(new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: `uploads/${userId}/${uploadId}/${uploadedData.name}`,
         Body: uploadedData.data
     }));
 
-    // // 2.2 create a thumbnail image and upload it as well
-    await s3Client.send(new PutObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: `uploads/${userId}/${uploadId}/thumbnail.png`,
-        Body: await sharp(uploadedData.data).resize(200).toFormat("png").toBuffer()
-    }))
+    let generatedThumbnail = false;
+    // 2.2.1 Check if the uploaded file was an image; if it is, try to create a thumbnail for it
+    if (uploadedData.mimetype.includes("image/")) {
+        try {
+            // 2.2 create a thumbnail image and upload it as well
+            const buf = await sharp(uploadedData.data).resize(200).toFormat("png").toBuffer();
+            await s3Client.send(new PutObjectCommand({
+                Bucket: S3_BUCKET,
+                Key: `uploads/${userId}/${uploadId}/thumbnail.png`,
+                Body: buf
+            }));
+            generatedThumbnail = true;
+        } catch (e) {
+            // Silently fail
+            console.error(e);
+        }
+    }
 
-    // // 3. create a record in dynamodb with the snowflake and original filename
+    // 3. create a record in dynamodb with the snowflake and original filename
     const record = await Upload.create({
         userId: userId,
         uploadId: uploadId,
@@ -102,7 +113,7 @@ router.post("/upload", async (req: Request, res: Response) => {
         "success": true,
         "urls": {
             "url": url,
-            "thumbnail": thumbnail,
+            "thumbnail": generatedThumbnail ? thumbnail : null,
             // "delete": delete_url
         }
     });
