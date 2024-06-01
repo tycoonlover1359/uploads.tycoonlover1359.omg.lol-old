@@ -21,4 +21,12 @@ async function render(req: Request, view: string, data?: object): Promise<[Error
     return [err, result];
 }
 
-export { renderer, render };
+async function renderRaw(view: string, data?: object): Promise<[Error | null, string]> {
+    if (!data) {
+        data = {};
+    }
+
+    return await renderer.render(view, data);
+}
+
+export { renderer, render, renderRaw };
