@@ -26,14 +26,22 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
         });
 
         // DynamoDB table
-        const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
+        // const uploadsTable = new dynamodb.TableV2(this, "UploadsTable", {
+        //     partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
+        //     sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
+        //     billing: dynamodb.Billing.provisioned({
+        //         readCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 }),
+        //         writeCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 })
+        //     }),
+        //     removalPolicy: cdk.RemovalPolicy.DESTROY
+        // });
+        const uploadsTable = new dynamodb.Table(this, "UploadsTable", {
             partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
             sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
-            billing: dynamodb.Billing.provisioned({
-                readCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 }),
-                writeCapacity: dynamodb.Capacity.autoscaled({ maxCapacity: 1 })
-            }),
-            removalPolicy: cdk.RemovalPolicy.DESTROY
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+            readCapacity: 1,
+            writeCapacity: 1
         });
 
         // Cloudfront header added to each request from Cloudfront
@@ -181,7 +189,7 @@ export class UploadsTycoonlover1359OmgLolStack extends cdk.Stack {
                     queryStringBehavior: cloudfront.CacheQueryStringBehavior.allowList("type"),
                     minTtl: Duration.seconds(0),
                     maxTtl: Duration.days(1),
-                    defaultTtl: Duration.minutes(0)
+                    defaultTtl: Duration.minutes(60)
                 })
             },
             additionalBehaviors: {
