@@ -70,9 +70,9 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
             console.log("item is image; sending raw")
             let key: string;
             if (type === "raw") {
-                key = `uploads/${req.params.userId}/${req.params. uploadId}/${upload.data.filename}`;
+                key = `uploads/${req.params.userId}/${req.params.uploadId}/${upload.data.filename}`;
             } else if (type === "thumbnail") {
-                key = `uploads/${req.params.userId}/${req.params. uploadId}/thumbnail.png`;
+                key = `uploads/${req.params.userId}/${req.params.uploadId}/thumbnail.png`;
             } else {
                 const [err, result] = await render(req, "errors/404");
                 res.status(404).send(result);
@@ -93,11 +93,17 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
             } finally {
                 return;
             }
+        } else if (mimeType.includes("text/")) {
+            if (type == "raw") {
+                const response = await s3Controller.getObject(`uploads/${req.params.userId}/${req.params.uploadId}/${upload.data.filename}`);
+                res.contentType(upload.data.mimeType).end(await response.Body?.transformToString());
+            }
         }
     } else {
         console.log("no type; sending user page");
         const [err, result] = await render(req, "view_item", {
             title: `Test.png`,
+            mimeType: upload.data.mimeType,
             links: {
                 raw: `/uploads/${req.params.userId}/${req.params. uploadId}?type=raw`
             }

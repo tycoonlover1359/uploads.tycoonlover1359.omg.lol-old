@@ -5,6 +5,12 @@
     </div>
     <br>
     <div class="d-flex justify-content-center">
-        <img src="<%= links.raw %>" class="img-fluid">
+        <div class="bg-body-secondary p-2">
+            <% if (mimeType.includes("image/")) { %>
+                <img src="<%= links.raw %>" class="img-fluid">
+            <% } else if (mimeType.includes("text/") || mimeType == "application/json") { %>
+                <pre style="word-wrap: break-word; white-space: pre-wrap;" hx-trigger="load" hx-get="<%= links.raw %>"></pre>
+            <% } %>
+        </div>
     </div>
 </div>
