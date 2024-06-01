@@ -7,12 +7,12 @@ import { NoSuchKey } from "@aws-sdk/client-s3";
 const router: Router = express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
-    const [err, result] = await render(req, "home");
+    const [err, result] = await render(req, "home", { title: "Home" });
     res.send(result);
 });
 
 router.get("/login", async (req: Request, res: Response) => {
-    const [err, result] = await render(req, "login");
+    const [err, result] = await render(req, "login", { title: "Login" });
     res.send(result);
 });
 
@@ -20,20 +20,27 @@ router.get("/register", async (req: Request, res: Response) => {
     res.send("register")
 });
 
-router.get("/uploads", async (req: Request, res: Response) => {
+router.get("/uploads/:userId", async (req: Request, res: Response) => {
+    const userId = req.params.userId;
     const uploads = [];
 
+    const response = await Upload.query.byId({
+        userId: userId
+    }).go();
+
+
     let row = [];
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= response.data.length; i++) {
+        const upload = response.data[i - 1];
         row.push({
+            title: upload.title,
             urls: {
-                thumbnail: `/static/Thumbnail Test.png`,
-                view: `/uploads/${i}`,
-                edit: `/uploads/${i}/edit`,
-            },
-            title: `upload ${i}`
+                thumbnail: upload.mimeType.includes("image/") ? `/uploads/${upload.userId}/${upload.uploadId}?type=thumbnail` : null,
+                view: `/uploads/${upload.userId}/${upload.uploadId}`,
+                edit: `/uploads/${upload.userId}/${upload.uploadId}/edit`
+            }
         });
-        if (i % 6 == 0) {
+        if (i % 3 == 0) {
             uploads.push(row);
             row = [];
         }
@@ -42,7 +49,7 @@ router.get("/uploads", async (req: Request, res: Response) => {
         uploads.push(row);
     }
 
-    const [err, result] = await render(req, "uploads", { uploads: uploads });
+    const [err, result] = await render(req, "uploads", { title: "Uploads", uploads: uploads });
     res.send(result);
 });
 

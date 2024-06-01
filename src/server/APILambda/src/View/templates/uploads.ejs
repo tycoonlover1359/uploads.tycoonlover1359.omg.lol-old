@@ -1,6 +1,6 @@
 <div class="container">
     <h1>Uploads</h1>
-    <div class="row row-cols-6" hx-boost="true" hx-target="#app-container" hx-swap="innerHTML">
+    <div class="row row-cols-3" hx-boost="true" hx-target="#app-container" hx-swap="innerHTML">
         <% for (row of uploads) { %>
             <% for (upload of row) { %>
                 <%- await render("partials/_upload", { upload: upload }); %>
