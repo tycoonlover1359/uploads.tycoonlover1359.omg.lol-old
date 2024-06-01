@@ -102,7 +102,7 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
     } else {
         console.log("no type; sending user page");
         const [err, result] = await render(req, "view_item", {
-            title: `Test.png`,
+            title: `${upload.data.title}`,
             mimeType: upload.data.mimeType,
             links: {
                 raw: `/uploads/${req.params.userId}/${req.params. uploadId}?type=raw`
