@@ -1,4 +1,5 @@
 import express, { Request, Response, Router, NextFunction } from "express";
+import { protectRoute } from "@kinde-oss/kinde-node-express";
 import { render, renderRaw } from "../TemplateController";
 import { Upload } from "../../Model/Upload";
 import { s3Controller } from "../S3Controller";
@@ -8,18 +9,29 @@ const router: Router = express.Router();
 const AUTH_KEY = process.env.UPLOADS_AUTH_KEY;
 
 router.get("/", async (req: Request, res: Response) => {
-    const [err, result] = await render(req, "home", { title: "Home" });
-    res.send(result);
+    console.log(req.session);
+    if (req.session && req.session.kindeAccessToken) {
+        res.send("auth")
+    } else {
+        res.send("no auth");
+    }
+
+    // const [err, result] = await render(req, "home", { title: "Home" });
+    // res.send(result);
 });
 
-router.get("/login", async (req: Request, res: Response) => {
-    const [err, result] = await render(req, "login", { title: "Login" });
-    res.send(result);
+router.get("/admin", protectRoute, (req, res) => {
+    res.send("Welcome to the admin area");
 });
 
-router.get("/register", async (req: Request, res: Response) => {
-    res.send("register")
-});
+// router.get("/login", async (req: Request, res: Response) => {
+//     const [err, result] = await render(req, "login", { title: "Login" });
+//     res.send(result);
+// });
+
+// router.get("/register", async (req: Request, res: Response) => {
+//     res.send("register")
+// });
 
 router.get("/uploads/:userId", async (req: Request, res: Response) => {
     if (req.query.authorization != AUTH_KEY) {
