@@ -10,7 +10,11 @@
     <script src="/static/htmx.min.js" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2"></script>
     <script src="/static/hyperscript.min.js" integrity="sha384-+Uth1QzYJsTjnS5SXVN3fFO4I32Y571xIuv53WJ2SA7y5/36tKU1VCutONAmg5eH"></script>
 
-    <title><%= title %> <!-- · uploads.tycoonlover1359.omg.lol--></title>
+    <% if (typeof head != "undefined") { %>
+        <%- head %>
+    <% } %>
+
+    <title><%= title %></title><!-- · uploads.tycoonlover1359.omg.lol-->
 </head>
 <body>
     <%- await render("navbar"); %>

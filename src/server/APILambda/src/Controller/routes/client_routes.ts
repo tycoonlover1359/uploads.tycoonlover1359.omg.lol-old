@@ -1,10 +1,11 @@
 import express, { Request, Response, Router, NextFunction } from "express";
-import { render } from "../TemplateController";
+import { render, renderRaw } from "../TemplateController";
 import { Upload } from "../../Model/Upload";
 import { s3Controller } from "../S3Controller";
 import { NoSuchKey } from "@aws-sdk/client-s3";
 
 const router: Router = express.Router();
+const AUTH_KEY = process.env.UPLOADS_AUTH_KEY;
 
 router.get("/", async (req: Request, res: Response) => {
     const [err, result] = await render(req, "home", { title: "Home" });
@@ -21,6 +22,11 @@ router.get("/register", async (req: Request, res: Response) => {
 });
 
 router.get("/uploads/:userId", async (req: Request, res: Response) => {
+    if (req.query.authorization != AUTH_KEY) {
+        res.status(401).send("Unauthorized");
+        return;
+    }
+
     const userId = req.params.userId;
     const uploads = [];
 
@@ -108,16 +114,43 @@ router.get("/uploads/:userId/:uploadId", async (req: Request, res: Response) => 
         }
     } else {
         console.log("no type; sending user page");
-        const [err, result] = await render(req, "view_item", {
+
+        const data = {
             title: `${upload.data.title}`,
             mimeType: upload.data.mimeType,
             links: {
-                raw: `/uploads/${req.params.userId}/${req.params. uploadId}?type=raw`
-            }
+                view: `/uploads/${upload.data.userId}/${upload.data.uploadId}`,
+                raw: `/uploads/${upload.data.userId}/${upload.data.uploadId}?type=raw`
+            },
+        };
+
+        const [hErr, head] = await renderRaw("partials/_view_item_meta", data);
+        
+        const [err, result] = await render(req, "view_item", {
+            head: head,
+            ...data
         });
     
         res.send(result);
     }
+});
+
+router.get("/uploads/:userId/:uploadId/metadata.json", async (req: Request, res: Response) => {
+    const upload = await Upload.get({
+        userId: req.params.userId,
+        uploadId: req.params.uploadId
+    }).go();
+
+    if (upload.data == null) {
+        res.sendStatus(404);
+        return;
+    }
+
+    res.send({
+        title: `${upload.data.title}`,
+        provider_name: "uploads.tycoonlover1359.omg.lol",
+        provider_url: "https://uploads.tycoonlover1359.omg.lol"
+    })
 });
 
 // router.get("/uploads/:userId/:uploadId/raw", async (req: Request, res: Response) => {
